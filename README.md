@@ -1,4 +1,4 @@
-# @dashscope/claude-code-config
+# @alicloud/claude-code-config
 
 A Node.js package that provides default configuration for claude-code-router with DashScope support.
 
