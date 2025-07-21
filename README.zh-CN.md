@@ -1,4 +1,4 @@
-# @dashscope/claude-code-dashscope-config
+# @alicloud/claude-code-config
 
 为 claude-code-router 提供 DashScope 默认配置的 Node.js 包。
 
@@ -28,7 +28,7 @@ npm install -g @anthropic-ai/claude-code
 npm install -g @musistudio/claude-code-router
 
 # 3. 安装 DashScope 配置包
-npm install -g @dashscope/claude-code-dashscope-config
+npm install -g @alicloud/claude-code-config
 ```
 
 ### 3. 运行配置
