@@ -1,4 +1,4 @@
-# @alicloud/claude-code-config
+# @dashscope-js/claude-code-config
 
 A Node.js package that provides default configuration for claude-code-router with DashScope support.
 
@@ -14,6 +14,7 @@ A Node.js package that provides default configuration for claude-code-router wit
 ### 1. Set up API Key (Required)
 
 **Option 1: Environment Variable (Recommended)**
+
 ```bash
 export DASHSCOPE_API_KEY="your-api-key-here"
 ```
@@ -30,7 +31,7 @@ npm install -g @anthropic-ai/claude-code
 npm install -g @musistudio/claude-code-router
 
 # 3. Install DashScope configuration package
-npm install -g @alicloud/claude-code-config
+npm install -g @dashscope-js/claude-code-config
 ```
 
 ### 3. Run Configuration
@@ -48,6 +49,7 @@ ccr code
 ## Language Support
 
 This tool supports bilingual Chinese/English and automatically selects based on system language:
+
 - Chinese environment (`LANG` contains `zh`): Displays Chinese prompts
 - Other environments: Displays English prompts
 
@@ -65,11 +67,13 @@ Running `ccr-qwen` will automatically generate the above directories and files.
 If you didn't set the environment variable before running `ccr-qwen`, you can manually edit the configuration file:
 
 1. Navigate to the configuration directory:
+
    ```bash
    cd ~/.claude-code-router
    ```
 
 2. Edit the configuration file:
+
    ```bash
    # On macOS/Linux
    nano config.json

@@ -1,4 +1,4 @@
-# @alicloud/claude-code-config
+# @dashscope-js/claude-code-config
 
 为 claude-code-router 提供 DashScope 默认配置的 Node.js 包。
 
@@ -12,6 +12,7 @@
 ### 1. 配置 API Key（必需）
 
 **方式 1: 环境变量（推荐）**
+
 ```bash
 export DASHSCOPE_API_KEY="your-api-key-here"
 ```
@@ -28,7 +29,7 @@ npm install -g @anthropic-ai/claude-code
 npm install -g @musistudio/claude-code-router
 
 # 3. 安装 DashScope 配置包
-npm install -g @alicloud/claude-code-config
+npm install -g @dashscope-js/claude-code-config
 ```
 
 ### 3. 运行配置
@@ -46,6 +47,7 @@ ccr code
 ## 语言支持
 
 本工具支持中英文双语，会根据系统语言自动选择：
+
 - 中文环境（`LANG` 包含 `zh`）：显示中文提示
 - 其他环境：显示英文提示
 
@@ -63,11 +65,13 @@ ccr code
 如果在运行 `ccr-qwen` 之前没有设置环境变量，可以手动编辑配置文件：
 
 1. 进入配置目录：
+
    ```bash
    cd ~/.claude-code-router
    ```
 
 2. 编辑配置文件：
+
    ```bash
    # macOS/Linux 系统
    nano config.json
