@@ -1,4 +1,4 @@
-# @dashscope/claude-code-dashscope-config
+# @dashscope/claude-code-config
 
 A Node.js package that provides default configuration for claude-code-router with DashScope support.
 
@@ -30,7 +30,7 @@ npm install -g @anthropic-ai/claude-code
 npm install -g @musistudio/claude-code-router
 
 # 3. Install DashScope configuration package
-npm install -g @dashscope/claude-code-dashscope-config
+npm install -g @alicloud/claude-code-config
 ```
 
 ### 3. Run Configuration
