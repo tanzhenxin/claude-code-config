@@ -120,6 +120,32 @@ describe("ClaudeCodeRouterConfig", () => {
     });
   });
 
+  describe("error handling", () => {
+    beforeEach(() => {
+      config = new ClaudeCodeRouterConfig();
+    });
+
+    it("should handle transformer file write errors", async () => {
+      const error = new Error("Write failed");
+      fs.writeFile.mockRejectedValueOnce(error);
+      fs.writeJson.mockResolvedValue(); // Make sure other fs operations succeed
+
+      await expect(config.createTransformerFile()).rejects.toThrow(
+        "Write failed"
+      );
+    });
+
+    it("should handle config file write errors", async () => {
+      const error = new Error("JSON write failed");
+      fs.writeJson.mockRejectedValueOnce(error);
+      fs.writeFile.mockResolvedValue(); // Make sure other fs operations succeed
+
+      await expect(config.createConfigFile("test-key", "cn")).rejects.toThrow(
+        "JSON write failed"
+      );
+    });
+  });
+
   describe("createConfigFile", () => {
     beforeEach(() => {
       config = new ClaudeCodeRouterConfig();
@@ -290,6 +316,111 @@ describe("ClaudeCodeRouterConfig", () => {
       await config.setup();
 
       expect(process.exit).toHaveBeenCalledWith(1);
+    });
+  });
+
+  describe("promptForRegion", () => {
+    beforeEach(() => {
+      config = new ClaudeCodeRouterConfig();
+      
+      // Mock console.log
+      jest.spyOn(console, "log").mockImplementation();
+    });
+
+    afterEach(() => {
+      console.log.mockRestore();
+    });
+
+    it("should prompt for region and return 'cn' when user selects 1", async () => {
+      const mockReadline = {
+        question: jest.fn(),
+        close: jest.fn()
+      };
+
+      const readline = require("readline");
+      jest.spyOn(readline, "createInterface").mockReturnValue(mockReadline);
+
+      mockReadline.question.mockImplementation((prompt, callback) => {
+        callback("1");
+      });
+
+      const result = await config.promptForRegion();
+
+      expect(readline.createInterface).toHaveBeenCalledWith({
+        input: process.stdin,
+        output: process.stdout
+      });
+      expect(mockReadline.question).toHaveBeenCalled();
+      expect(mockReadline.close).toHaveBeenCalled();
+      expect(result).toBe("cn");
+    });
+
+    it("should prompt for region and return 'intl' when user selects 2", async () => {
+      const mockReadline = {
+        question: jest.fn(),
+        close: jest.fn()
+      };
+
+      const readline = require("readline");
+      jest.spyOn(readline, "createInterface").mockReturnValue(mockReadline);
+
+      mockReadline.question.mockImplementation((prompt, callback) => {
+        callback("2");
+      });
+
+      const result = await config.promptForRegion();
+
+      expect(result).toBe("intl");
+      expect(mockReadline.close).toHaveBeenCalled();
+    });
+
+    it("should re-prompt when invalid input is provided", async () => {
+      const mockReadline = {
+        question: jest.fn(),
+        close: jest.fn()
+      };
+
+      const readline = require("readline");
+      jest.spyOn(readline, "createInterface").mockReturnValue(mockReadline);
+
+      let callCount = 0;
+      mockReadline.question.mockImplementation((prompt, callback) => {
+        callCount++;
+        if (callCount === 1) {
+          callback("invalid");
+        } else {
+          callback("1");
+        }
+      });
+
+      const result = await config.promptForRegion();
+
+      expect(mockReadline.question).toHaveBeenCalledTimes(2);
+      expect(result).toBe("cn");
+      expect(console.log).toHaveBeenCalledWith(
+        expect.stringContaining("Please enter 1 or 2")
+      );
+    });
+  });
+
+  describe("getApiBaseUrl", () => {
+    beforeEach(() => {
+      config = new ClaudeCodeRouterConfig();
+    });
+
+    it("should return China URL for 'cn' region", () => {
+      const result = config.getApiBaseUrl("cn");
+      expect(result).toBe("https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions");
+    });
+
+    it("should return International URL for 'intl' region", () => {
+      const result = config.getApiBaseUrl("intl");
+      expect(result).toBe("https://dashscope-intl.aliyuncs.com/compatible-mode/v1/chat/completions");
+    });
+
+    it("should default to China URL for unknown region", () => {
+      const result = config.getApiBaseUrl("unknown");
+      expect(result).toBe("https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions");
     });
   });
 
