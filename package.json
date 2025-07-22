@@ -5,14 +5,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/dashscope/claude-code-config.git"
+    "url": "git+https://github.com/dashscope/claude-code-config.git"
   },
   "name": "@dashscope-js/claude-code-config",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Default configuration for claude-code-router with DashScope support",
   "main": "index.js",
   "bin": {
-    "ccr-dashscope": "./bin/claude-code-router-config.js"
+    "ccr-dashscope": "bin/claude-code-router-config.js"
   },
   "scripts": {
     "lint": "echo lint",
