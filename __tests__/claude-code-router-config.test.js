@@ -127,8 +127,9 @@ describe("ClaudeCodeRouterConfig", () => {
 
     it("should create config file with API Key from environment variable", async () => {
       const testApiKey = "test-api-key-from-env";
+      const testRegion = "cn";
       
-      await config.createConfigFile(testApiKey);
+      await config.createConfigFile(testApiKey, testRegion);
 
       expect(fs.writeJson).toHaveBeenCalledWith(
         config.configFile,
@@ -136,6 +137,7 @@ describe("ClaudeCodeRouterConfig", () => {
           Providers: expect.arrayContaining([
             expect.objectContaining({
               api_key: testApiKey,
+              api_base_url: "https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions",
             }),
           ]),
         }),
@@ -145,8 +147,9 @@ describe("ClaudeCodeRouterConfig", () => {
 
     it("should create config file with provided API Key", async () => {
       const testApiKey = "test-api-key-provided";
+      const testRegion = "intl";
       
-      await config.createConfigFile(testApiKey);
+      await config.createConfigFile(testApiKey, testRegion);
 
       expect(fs.writeJson).toHaveBeenCalledWith(
         config.configFile,
@@ -154,6 +157,7 @@ describe("ClaudeCodeRouterConfig", () => {
           Providers: expect.arrayContaining([
             expect.objectContaining({
               api_key: testApiKey,
+              api_base_url: "https://dashscope-intl.aliyuncs.com/compatible-mode/v1/chat/completions",
             }),
           ]),
         }),
@@ -162,7 +166,7 @@ describe("ClaudeCodeRouterConfig", () => {
     });
 
     it("should use undefined API Key when no API Key is provided", async () => {
-      await config.createConfigFile();
+      await config.createConfigFile(undefined, "cn");
 
       expect(fs.writeJson).toHaveBeenCalledWith(
         config.configFile,
@@ -178,7 +182,7 @@ describe("ClaudeCodeRouterConfig", () => {
     });
 
     it("should contain correct configuration structure", async () => {
-      await config.createConfigFile();
+      await config.createConfigFile("test-key", "cn");
 
       const writeJsonCall = fs.writeJson.mock.calls[0];
       const configContent = writeJsonCall[1];
@@ -232,6 +236,7 @@ describe("ClaudeCodeRouterConfig", () => {
       jest.spyOn(config, "createConfigFile").mockResolvedValue();
       jest.spyOn(config, "createTransformerFile").mockResolvedValue();
       jest.spyOn(config, "promptForApiKey").mockResolvedValue("user-input-key");
+      jest.spyOn(config, "promptForRegion").mockResolvedValue("cn");
     });
 
     afterEach(() => {
@@ -244,8 +249,9 @@ describe("ClaudeCodeRouterConfig", () => {
 
       await config.setup();
 
+      expect(config.promptForRegion).toHaveBeenCalled();
       expect(config.createDirectories).toHaveBeenCalled();
-      expect(config.createConfigFile).toHaveBeenCalledWith("env-test-key");
+      expect(config.createConfigFile).toHaveBeenCalledWith("env-test-key", "cn");
       expect(config.createTransformerFile).toHaveBeenCalled();
       expect(config.promptForApiKey).not.toHaveBeenCalled();
     });
@@ -260,7 +266,7 @@ describe("ClaudeCodeRouterConfig", () => {
           "DASHSCOPE_API_KEY environment variable detected"
         )
       );
-      expect(config.createConfigFile).toHaveBeenCalledWith("test-key-from-env");
+      expect(config.createConfigFile).toHaveBeenCalledWith("test-key-from-env", "cn");
     });
 
     it("should prompt for API Key when environment variable is not present", async () => {
@@ -274,7 +280,7 @@ describe("ClaudeCodeRouterConfig", () => {
         )
       );
       expect(config.promptForApiKey).toHaveBeenCalled();
-      expect(config.createConfigFile).toHaveBeenCalledWith("user-input-key");
+      expect(config.createConfigFile).toHaveBeenCalledWith("user-input-key", "cn");
     });
 
     it("should handle errors during setup process", async () => {
