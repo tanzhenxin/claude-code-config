@@ -6,7 +6,7 @@ on:
 jobs:
   publish:
     runs-on: ubuntu-latest
-    # 当具有 release 标签的 PR 被合并时，自动发布包版本
+    # Automatically publish the package version when a PR with the release label is merged
     if: contains(github.event.pull_request.labels.*.name, 'release') && github.event.pull_request.merged == true
     permissions:
       contents: write
