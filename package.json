@@ -12,7 +12,7 @@
   "description": "Default configuration for claude-code-router with DashScope support",
   "main": "index.js",
   "bin": {
-    "ccr-qwen": "./bin/claude-code-router-config.js"
+    "ccr-dashscope": "./bin/claude-code-router-config.js"
   },
   "scripts": {
     "lint": "echo lint"

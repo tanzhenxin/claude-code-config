@@ -19,7 +19,9 @@ export DASHSCOPE_API_KEY="your-api-key-here"
 
 **方式 2: 也可以在安装后手动配置（详见配置章节）**
 
-### 2. 安装依赖
+### 2. 安装
+
+首先安装必要的前置依赖：
 
 ```bash
 # 1. 安装 claude-code
@@ -27,15 +29,32 @@ npm install -g @anthropic-ai/claude-code
 
 # 2. 安装 claude-code-router
 npm install -g @musistudio/claude-code-router
+```
 
-# 3. 安装 DashScope 配置包
+然后选择以下任意一种方式安装本配置包：
+
+**方式 1: 从 npm 仓库安装（推荐）**
+
+```bash
 npm install -g @dashscope-js/claude-code-config
+```
+
+**方式 2: 从源码安装**
+
+```bash
+# 克隆项目
+git clone https://github.com/dashscope/claude-code-config.git
+cd claude-code-config
+
+# 安装依赖并全局安装
+npm install
+npm install -g .
 ```
 
 ### 3. 运行配置
 
 ```bash
-ccr-qwen
+ccr-dashscope
 ```
 
 ### 4. 开始使用
@@ -58,11 +77,11 @@ ccr code
 - 主配置文件路径：`~/.claude-code-router/config.json`
 - 插件目录路径：`~/.claude-code-router/plugins/`
 
-运行 `ccr-qwen` 后会自动生成上述目录和文件。
+运行 `ccr-dashscope` 后会自动生成上述目录和文件。
 
 ### 手动配置 API Key
 
-如果在运行 `ccr-qwen` 之前没有设置环境变量，可以手动编辑配置文件：
+如果在运行 `ccr-dashscope` 之前没有设置环境变量，可以手动编辑配置文件：
 
 1. 进入配置目录：
 

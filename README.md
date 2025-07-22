@@ -21,7 +21,9 @@ export DASHSCOPE_API_KEY="your-api-key-here"
 
 **Option 2: You can also configure manually after setup (see Configuration section)**
 
-### 2. Install Dependencies
+### 2. Installation
+
+First, install the required dependencies:
 
 ```bash
 # 1. Install claude-code
@@ -29,15 +31,32 @@ npm install -g @anthropic-ai/claude-code
 
 # 2. Install claude-code-router
 npm install -g @musistudio/claude-code-router
+```
 
-# 3. Install DashScope configuration package
+Then choose one of the following installation methods for the configuration package:
+
+**Option 1: Install from npm registry (Recommended)**
+
+```bash
 npm install -g @dashscope-js/claude-code-config
+```
+
+**Option 2: Install from source code**
+
+```bash
+# Clone the repository
+git clone https://github.com/dashscope/claude-code-config.git
+cd claude-code-config
+
+# Install dependencies and install globally
+npm install
+npm install -g .
 ```
 
 ### 3. Run Configuration
 
 ```bash
-ccr-qwen
+ccr-dashscope
 ```
 
 ### 4. Start Using
@@ -60,11 +79,11 @@ Default configuration directory: `~/.claude-code-router/`
 - Main configuration file: `~/.claude-code-router/config.json`
 - Plugins directory: `~/.claude-code-router/plugins/`
 
-Running `ccr-qwen` will automatically generate the above directories and files.
+Running `ccr-dashscope` will automatically generate the above directories and files.
 
 ### Manual API Key Configuration
 
-If you didn't set the environment variable before running `ccr-qwen`, you can manually edit the configuration file:
+If you didn't set the environment variable before running `ccr-dashscope`, you can manually edit the configuration file:
 
 1. Navigate to the configuration directory:
 
