@@ -126,16 +126,16 @@ describe("ClaudeCodeRouterConfig", () => {
     });
 
     it("should create config file with API Key from environment variable", async () => {
-      process.env.DASHSCOPE_API_KEY = "test-api-key";
-
-      await config.createConfigFile();
+      const testApiKey = "test-api-key-from-env";
+      
+      await config.createConfigFile(testApiKey);
 
       expect(fs.writeJson).toHaveBeenCalledWith(
         config.configFile,
         expect.objectContaining({
           Providers: expect.arrayContaining([
             expect.objectContaining({
-              api_key: "test-api-key",
+              api_key: testApiKey,
             }),
           ]),
         }),
@@ -143,9 +143,25 @@ describe("ClaudeCodeRouterConfig", () => {
       );
     });
 
-    it("should use undefined API Key when environment variable is not present", async () => {
-      delete process.env.DASHSCOPE_API_KEY;
+    it("should create config file with provided API Key", async () => {
+      const testApiKey = "test-api-key-provided";
+      
+      await config.createConfigFile(testApiKey);
 
+      expect(fs.writeJson).toHaveBeenCalledWith(
+        config.configFile,
+        expect.objectContaining({
+          Providers: expect.arrayContaining([
+            expect.objectContaining({
+              api_key: testApiKey,
+            }),
+          ]),
+        }),
+        { spaces: 2 }
+      );
+    });
+
+    it("should use undefined API Key when no API Key is provided", async () => {
       await config.createConfigFile();
 
       expect(fs.writeJson).toHaveBeenCalledWith(
@@ -215,6 +231,7 @@ describe("ClaudeCodeRouterConfig", () => {
       jest.spyOn(config, "createDirectories").mockResolvedValue();
       jest.spyOn(config, "createConfigFile").mockResolvedValue();
       jest.spyOn(config, "createTransformerFile").mockResolvedValue();
+      jest.spyOn(config, "promptForApiKey").mockResolvedValue("user-input-key");
     });
 
     afterEach(() => {
@@ -222,16 +239,19 @@ describe("ClaudeCodeRouterConfig", () => {
       console.error.mockRestore();
     });
 
-    it("should successfully complete setup process", async () => {
+    it("should successfully complete setup process with environment variable", async () => {
+      process.env.DASHSCOPE_API_KEY = "env-test-key";
+
       await config.setup();
 
       expect(config.createDirectories).toHaveBeenCalled();
-      expect(config.createConfigFile).toHaveBeenCalled();
+      expect(config.createConfigFile).toHaveBeenCalledWith("env-test-key");
       expect(config.createTransformerFile).toHaveBeenCalled();
+      expect(config.promptForApiKey).not.toHaveBeenCalled();
     });
 
     it("should detect API Key in environment variable", async () => {
-      process.env.DASHSCOPE_API_KEY = "test-key";
+      process.env.DASHSCOPE_API_KEY = "test-key-from-env";
 
       await config.setup();
 
@@ -240,9 +260,10 @@ describe("ClaudeCodeRouterConfig", () => {
           "DASHSCOPE_API_KEY environment variable detected"
         )
       );
+      expect(config.createConfigFile).toHaveBeenCalledWith("test-key-from-env");
     });
 
-    it("should show warning when environment variable is not present", async () => {
+    it("should prompt for API Key when environment variable is not present", async () => {
       delete process.env.DASHSCOPE_API_KEY;
 
       await config.setup();
@@ -252,6 +273,8 @@ describe("ClaudeCodeRouterConfig", () => {
           "DASHSCOPE_API_KEY environment variable not found"
         )
       );
+      expect(config.promptForApiKey).toHaveBeenCalled();
+      expect(config.createConfigFile).toHaveBeenCalledWith("user-input-key");
     });
 
     it("should handle errors during setup process", async () => {
@@ -261,6 +284,80 @@ describe("ClaudeCodeRouterConfig", () => {
       await config.setup();
 
       expect(process.exit).toHaveBeenCalledWith(1);
+    });
+  });
+
+  describe("promptForApiKey", () => {
+    beforeEach(() => {
+      config = new ClaudeCodeRouterConfig();
+      
+      // Mock console.log
+      jest.spyOn(console, "log").mockImplementation();
+    });
+
+    afterEach(() => {
+      console.log.mockRestore();
+    });
+
+    it("should prompt for API Key and return user input", async () => {
+      const mockReadline = {
+        question: jest.fn(),
+        close: jest.fn()
+      };
+
+      // Mock readline.createInterface
+      const readline = require("readline");
+      jest.spyOn(readline, "createInterface").mockReturnValue(mockReadline);
+
+      // Mock the question callback to simulate user input
+      mockReadline.question.mockImplementation((prompt, callback) => {
+        callback("user-provided-api-key");
+      });
+
+      const result = await config.promptForApiKey();
+
+      expect(readline.createInterface).toHaveBeenCalledWith({
+        input: process.stdin,
+        output: process.stdout
+      });
+      expect(mockReadline.question).toHaveBeenCalledWith(
+        expect.stringContaining("API Key"),
+        expect.any(Function)
+      );
+      expect(mockReadline.close).toHaveBeenCalled();
+      expect(result).toBe("user-provided-api-key");
+      expect(console.log).toHaveBeenCalledWith(
+        expect.stringContaining("configured")
+      );
+    });
+
+    it("should re-prompt when empty API Key is provided", async () => {
+      const mockReadline = {
+        question: jest.fn(),
+        close: jest.fn()
+      };
+
+      const readline = require("readline");
+      jest.spyOn(readline, "createInterface").mockReturnValue(mockReadline);
+
+      // First call returns empty string, second call returns valid key
+      let callCount = 0;
+      mockReadline.question.mockImplementation((prompt, callback) => {
+        callCount++;
+        if (callCount === 1) {
+          callback("  "); // Empty/whitespace only
+        } else {
+          callback("valid-api-key");
+        }
+      });
+
+      const result = await config.promptForApiKey();
+
+      expect(mockReadline.question).toHaveBeenCalledTimes(2);
+      expect(result).toBe("valid-api-key");
+      expect(console.log).toHaveBeenCalledWith(
+        expect.stringContaining("cannot be empty")
+      );
     });
   });
 });

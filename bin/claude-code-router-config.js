@@ -3,6 +3,7 @@
 const fs = require("fs-extra");
 const path = require("path");
 const os = require("os");
+const readline = require("readline");
 
 class ClaudeCodeRouterConfig {
   constructor() {
@@ -37,6 +38,10 @@ class ClaudeCodeRouterConfig {
         step2: "2. 请确保已安装 @musistudio/claude-code-router",
         step3Warning: "3. ⚠️  请手动配置环境变量DASHSCOPE_API_KEY:",
         step3Success: "3. ✅ API Key 已从环境变量自动配置",
+        promptApiKey: "请输入您的 DashScope API Key:",
+        apiKeyPrompt: "DashScope API Key",
+        apiKeyConfigured: "✅ API Key 已配置完成",
+        invalidApiKey: "❌ API Key 不能为空，请重新输入",
         step4: "4. 运行 ccr code 开始使用",
         configFailed: "❌ 配置失败:",
         createDir: "📁 创建目录:",
@@ -60,6 +65,10 @@ class ClaudeCodeRouterConfig {
         step2: "2. Please ensure @musistudio/claude-code-router is installed",
         step3Warning: "3. ⚠️  Please manually set your DASHSCOPE_API_KEY environment variable:",
         step3Success: "3. ✅ API Key automatically configured from environment variable",
+        promptApiKey: "Please enter your DashScope API Key:",
+        apiKeyPrompt: "DashScope API Key",
+        apiKeyConfigured: "✅ API Key configured successfully",
+        invalidApiKey: "❌ API Key cannot be empty, please try again",
         step4: "4. Run ccr code to start using",
         configFailed: "❌ Configuration failed:",
         createDir: "📁 Creating directory:",
@@ -76,23 +85,51 @@ class ClaudeCodeRouterConfig {
     return messages[this.language];
   }
 
+  async promptForApiKey() {
+    const rl = readline.createInterface({
+      input: process.stdin,
+      output: process.stdout
+    });
+
+    return new Promise((resolve) => {
+      const askForKey = () => {
+        rl.question(`${this.messages.promptApiKey} `, (apiKey) => {
+          const trimmedKey = apiKey.trim();
+          if (trimmedKey) {
+            console.log(this.messages.apiKeyConfigured);
+            rl.close();
+            resolve(trimmedKey);
+          } else {
+            console.log(this.messages.invalidApiKey);
+            askForKey();
+          }
+        });
+      };
+      askForKey();
+    });
+  }
+
   async setup() {
     try {
       console.log(this.messages.configuring);
 
       // 检查环境变量
-      const hasEnvApiKey = !!process.env.DASHSCOPE_API_KEY;
+      let apiKey = process.env.DASHSCOPE_API_KEY;
+      const hasEnvApiKey = !!apiKey;
+      
       if (hasEnvApiKey) {
         console.log(this.messages.envKeyDetected);
       } else {
         console.log(this.messages.envKeyNotFound);
+        // 提示用户输入 API Key
+        apiKey = await this.promptForApiKey();
       }
 
       // 创建配置目录
       await this.createDirectories();
 
       // 创建配置文件
-      await this.createConfigFile();
+      await this.createConfigFile(apiKey);
 
       // 创建插件文件
       await this.createTransformerFile();
@@ -103,17 +140,7 @@ class ClaudeCodeRouterConfig {
       console.log(this.messages.usage);
       console.log(this.messages.step1);
       console.log(this.messages.step2);
-
-      if (!hasEnvApiKey) {
-        console.log(this.messages.step3Warning);
-        console.log(this.messages.editConfigInstructions[0] + this.configDir);
-        console.log(this.messages.editConfigInstructions[1]);
-        console.log(this.messages.editConfigInstructions[2]);
-        console.log(this.messages.editConfigInstructions[3]);
-      } else {
-        console.log(this.messages.step3Success);
-      }
-
+      console.log(this.messages.step3Success);
       console.log(this.messages.step4);
     } catch (error) {
       console.error(this.messages.configFailed, error.message);
@@ -131,9 +158,9 @@ class ClaudeCodeRouterConfig {
     console.log(this.messages.createDir, this.configDir);
   }
 
-  async createConfigFile() {
-    // 优先使用环境变量中的 API Key
-    const dashscopeApiKey = process.env.DASHSCOPE_API_KEY;
+  async createConfigFile(apiKey) {
+    // 使用传入的 API Key（可能来自环境变量或用户输入）
+    const dashscopeApiKey = apiKey;
 
     const configContent = {
       LOG: true,
