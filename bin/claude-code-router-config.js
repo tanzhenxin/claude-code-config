@@ -273,6 +273,17 @@ class ClaudeCodeRouterConfig {
     request.stream = this.stream;
     return request;
   }
+
+  async transformResponseOut(response) {
+    const contentType = response.headers.get("Content-Type");
+    const isEventStream = contentType?.includes("text/event-stream");
+
+    if (!isEventStream) {
+      response.headers.set("Content-Type", "text/event-stream");
+    }
+
+    return response;
+  }
 }
 
 module.exports = DashScopeTransformer;`;
