@@ -254,6 +254,7 @@ describe("ClaudeCodeRouterConfig", () => {
       expect(content).toContain("class DashScopeTransformer");
       expect(content).toContain('name = "dashscope"');
       expect(content).toContain("transformRequestIn");
+      expect(content).toContain("transformResponseOut");
       expect(content).toContain("module.exports = DashScopeTransformer");
     });
   });
